@@ -20,9 +20,12 @@ class UserSerializer(ModelSerializer):
 
         return user
     
+class ListUserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', 'is_admin')
 
 class RetrieveUserSerializer(ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', 'is_admin')
-

@@ -1,8 +1,9 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+from rest_framework.authtoken.models import Token
 
-from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer
+from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer, ListUserSerializer
 from .models import User
 
 
@@ -14,12 +15,16 @@ class ListCreateAPIView(ListCreateAPIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
             return Response(
                 status=HTTP_201_CREATED,
                 data={
                     'status_code': HTTP_201_CREATED,
                     'message': 'User created successfully',
-                    'data': UserSerializer(user).data
+                    'data': {
+                        'user': RetrieveUserSerializer(user).data,
+                        'token': token.key
+                    }
                 },
         )
         return Response(
@@ -38,7 +43,7 @@ class ListCreateAPIView(ListCreateAPIView):
             data={
                 'status_code': HTTP_200_OK,
                 'message': 'Users returned successfully',
-                'data': UserSerializer(self.get_queryset(), many=True).data
+                'data': ListUserSerializer(self.get_queryset(), many=True).data
             },
         )
 
@@ -91,3 +96,58 @@ class RetrieveUserView(RetrieveUpdateDestroyAPIView):
                 'data': RetrieveUserSerializer(user).data
             },
         )
+    
+
+class LoginView(CreateAPIView):
+    serializer_class = LoginSerializer
+    authentication_classes = ()
+
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
+            user = None
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response(
+                    status=HTTP_401_UNAUTHORIZED,
+                    data={
+                        'status_code': HTTP_401_UNAUTHORIZED,
+                        'message': 'Incorrect email or password',
+                        'data': None
+                    },
+                )
+            if user.check_password(password):
+                token, created = Token.objects.get_or_create(user=user)
+                return Response(
+                    status=HTTP_200_OK,
+                    data={
+                        'status_code': HTTP_200_OK,
+                        'message': 'Login successful',
+                        'data': {
+                            'user': RetrieveUserSerializer(user).data,
+                            'token': token.key
+                        }
+                    },
+                )
+            return Response(
+                status=HTTP_401_UNAUTHORIZED,
+                data={
+                    'status_code': HTTP_401_UNAUTHORIZED,
+                    'message': 'Invalid email or password',
+                    'data': None
+                },
+            )
+        return Response(
+            status=HTTP_400_BAD_REQUEST,
+            data={
+                'status_code': HTTP_400_BAD_REQUEST,
+                'message': 'Login failed',
+                'data': serializer.errors
+            },
+        )
+    
+
+

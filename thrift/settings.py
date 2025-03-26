@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_spectacular',
+    'contribution',
+    'payment'
 ]
 
 MIDDLEWARE = [
@@ -136,9 +139,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication'
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'core.exceptions.exception_handler',
 }
 
 SPECTACULAR_SETTINGS = {
@@ -155,3 +159,5 @@ SPECTACULAR_SETTINGS = {
         "persistAuthorization": True,
     },
 }
+
+AUTH_USER_MODEL = 'users.User'

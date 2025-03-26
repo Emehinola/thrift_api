@@ -1,0 +1,4 @@
+MAX_GROUP_USERS = 12
+
+MONTH_MAP_30 = [4, 6, 9, 11]
+MONTH_MAP_31 = [1, 3, 5, 7, 8, 10, 12]
