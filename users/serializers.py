@@ -1,4 +1,4 @@
-from .models import User
+from .models import User, Notification
 
 from rest_framework.serializers import Serializer, ModelSerializer, CharField
 
@@ -29,3 +29,8 @@ class RetrieveUserSerializer(ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', 'is_admin')
+
+class NotificationSerializer(ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'

@@ -132,7 +132,7 @@ class DisburseFundView(CreateAPIView):
                 Notification.objects.create(
                     user=contribution.payout_to,
                     notification_type=NotificationType.CONTRIBUTION_DISBURSEMENT,
-                    message=f'You have received a payout of ${contribution.amount} from {contribution.group.name}',
+                    message=f'You have received a payout of ₦{contribution.amount} from {contribution.group.name}',
                     amount=contribution.expected_amount
                 )
 

@@ -1,10 +1,11 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework.authtoken.models import Token
 
-from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer, ListUserSerializer
-from .models import User
+from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer, ListUserSerializer, NotificationSerializer
+from .models import User, Notification
+from core.permissions import IsAuthenticated
 
 
 class ListCreateAPIView(ListCreateAPIView):
@@ -151,3 +152,18 @@ class LoginView(CreateAPIView):
     
 
 
+class NotificationListView(ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = Notification.objects.all()
+
+
+    def list(self, request, *args, **kwargs):
+        return Response(
+            status=HTTP_200_OK,
+            data={
+                'message': 'Notifications',
+                'data': NotificationSerializer(request.user.notifications.all(), many=True).data,
+                'status_code': HTTP_200_OK
+            }
+        )
