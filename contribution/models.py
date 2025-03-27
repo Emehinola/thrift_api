@@ -79,6 +79,28 @@ class Contribution(models.Model):
         db_table = 'contributions'
         unique_together = ('group', 'position')
 
+    @property
+    def can_disburse(self):
+
+        if self.payout_status == PayoutStatus.RECEIVED:
+            return False, "Fund already disbursed"
+        
+        amount_contributed = sum([float(payment.amount) for payment in self.payments.all()]) # get the total amount contributed
+         # get the expected amount to be contributed by all users except the owner
+        if (amount_contributed < self.expected_amount):
+            return False, "All members must pay before disbursement"
+
+        return True, None
+    
+    @property
+    def expected_amount(self):
+        expected_amount = self.amount * (self.group.users.count() - 1)
+        return expected_amount
+    
+    def set_payout_to(self, user):
+        self.payout_to = user
+        self.save()
+
 # holds the payment made by a user for a particular contribution
 class ContributionPayment(models.Model):
     contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE, related_name='payments')

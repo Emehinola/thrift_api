@@ -1,5 +1,5 @@
-from rest_framework.serializers import ModelSerializer, IntegerField, SerializerMethodField, CharField
-from .models import Group, UserGroup, Contribution, PaymentStatus, ContributionStatus
+from rest_framework.serializers import ModelSerializer, IntegerField, SerializerMethodField, CharField, Serializer
+from .models import Group, UserGroup, Contribution, PaymentStatus, ContributionStatus, ContributionPayment, PayoutStatus
 
 class GroupSerializer(ModelSerializer):
     class Meta:
@@ -67,3 +67,88 @@ class SelfContributionSerializer(ModelSerializer):
         except:
             pass
         return PaymentStatus.UPCOMING
+    
+
+class UserDashboardSerializer(Serializer):
+    amount_contributed = SerializerMethodField()
+    total_contributed = SerializerMethodField()
+    group = SerializerMethodField()
+    countdown = SerializerMethodField()
+    member_contribution_status = SerializerMethodField()
+    upcoming_payouts = SerializerMethodField()
+    my_rotation = SerializerMethodField()
+
+
+    def get_amount_contributed(self, obj):
+        user = self.context['user']
+        amount = 0
+        try:
+            for payment in user.payments.all():
+                amount += payment.amount
+        except:
+            pass
+        return amount
+    
+    def get_total_contributed(self, obj):
+        user = self.context['user']
+        amount = 0
+        try:
+            for payment in user.payments.all():
+                amount += payment.amount
+        except:
+            pass
+        return amount
+    
+    def get_group(self, obj):
+        user = self.context['user']
+        try:
+            return {
+                'id': user.groups.last().id,
+                'name': user.groups.last().name,
+                'description': user.groups.last().description,
+                'status': user.groups.last().status
+            }
+        except:
+            return None
+    
+    def get_countdown(self, obj):
+        return 5
+    
+    def get_member_contribution_status(self, obj):
+        return '10/12'
+    
+    def get_upcoming_payouts(self, obj):
+        try:
+            user = self.context['user']
+            contributions = user.groups.last().contributions.all()
+            return [
+                {
+                    'position': i.position,
+                    'name': i.payout_to.name if i.payout_to != None else None,
+                    'amount': i.amount,
+                    'date': i.end_date
+                }
+
+                for i in contributions if i.payout_status == PayoutStatus.UPCOMING
+            ]
+        except Exception as e:
+            pass
+        return []
+    
+    def get_my_rotation(self, obj):
+        try:
+            user = self.context['user']
+            contributions = user.groups.last().contributions.all()
+            
+            for contr in contributions:
+                if contr.payout_to == user:
+                    return {
+                        'position': contr.position,
+                        'name': contr.payout_to.name if contr.payout_to != None else None,
+                        'amount': contr.amount,
+                        'status': contr.payout_status,
+                        'date': contr.end_date
+                    }
+        except Exception as e:
+            pass
+        return None

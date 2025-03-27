@@ -4,7 +4,9 @@ from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_
 from rest_framework.authtoken.models import Token
 
 from users.serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer
-from users.models import User
+from users.models import User, NotificationType, Notification
+from contribution.models import Contribution, ContributionStatus, PayoutStatus, Group
+from core.permissions import IsAuthenticated, IsAdmin
 
 
 
@@ -90,7 +92,13 @@ class AddMemberToGroupView(CreateAPIView):
                         'data': None
                     },
                 )
-            user.groups.add(kwargs.get('group_id'))
+            group = Group.objects.get('group_id')
+            user.groups.add(kwargs.get('group_id')) # add user to group
+
+            for contribution in group.contributions:
+                if contribution.postition == user.group.postition:
+                    contribution.set_payout_to(user) # set user rotation
+
             return Response(
                 status=HTTP_200_OK,
                 data={
@@ -107,3 +115,50 @@ class AddMemberToGroupView(CreateAPIView):
                 'data': serializer.errors
             },
         )
+    
+
+class DisburseFundView(CreateAPIView):
+    permission_classes = (IsAuthenticated, IsAdmin)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('contribution_id'))
+            if contribution.can_disburse[0]:
+                contribution.status = ContributionStatus.COMPLETED
+                contribution.payout_status = PayoutStatus.RECEIVED
+                contribution.save()
+
+                # create notification
+                Notification.objects.create(
+                    user=contribution.payout_to,
+                    notification_type=NotificationType.CONTRIBUTION_DISBURSEMENT,
+                    message=f'You have received a payout of ${contribution.amount} from {contribution.group.name}',
+                    amount=contribution.expected_amount
+                )
+
+                return Response(
+                    status=HTTP_200_OK,
+                    data={
+                        'status_code': HTTP_200_OK,
+                        'message': 'Fund disbursed successfully',
+                        'data': None
+                    },
+                )
+            return Response(
+                status=HTTP_400_BAD_REQUEST,
+                data={
+                    'status_code': HTTP_400_BAD_REQUEST,
+                    'message': 'Disbursement failed',
+                    'error': contribution.can_disburse[1]
+                },
+            )
+            
+        except Contribution.DoesNotExist:
+            return Response(
+                status=HTTP_404_NOT_FOUND,
+                data={
+                    'status_code': HTTP_404_NOT_FOUND,
+                    'message': 'Contribution not found',
+                    'error': 'Contribution not found'
+                },
+            )

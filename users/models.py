@@ -4,6 +4,13 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser
 from .manager import CustomManager
 
+class NotificationType(models.TextChoices):
+    GROUP_INVITATION = 'GROUP_INVITATION', 'Group Invitation'
+    FUND_CONTRIBUTION = 'FUND_CONTRIBUTION', 'Fund Contribution'
+    FUND_WITHDRAWAL = 'FUND_WITHDRAWAL', 'Fund Withdrawal'
+    CONTRIBUTION_DISBURSEMENT = 'CONTRIBUTION_DISBURSEMENT', 'Contribution Disbursement'
+    LOAN_REPAYMENT = 'LOAN_REPAYMENT', 'Loan Repayment'
+    DEFAULT = 'GENERAL', 'General'
 
 class User(AbstractBaseUser):
     email = models.EmailField(unique=True)
@@ -20,3 +27,19 @@ class User(AbstractBaseUser):
 
     class Meta:
         db_table = 'users'
+
+    @property
+    def group(self):
+        return self.groups.last()
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=50, choices=NotificationType.choices, default=NotificationType.DEFAULT)
+    amount = models.CharField(max_length=50, null=True, blank=True)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    date_created = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'notifications'
