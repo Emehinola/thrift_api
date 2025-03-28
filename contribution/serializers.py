@@ -77,6 +77,8 @@ class UserDashboardSerializer(Serializer):
     member_contribution_status = SerializerMethodField()
     upcoming_payouts = SerializerMethodField()
     my_rotation = SerializerMethodField()
+    contribution = SerializerMethodField()
+    is_my_turn = SerializerMethodField()
 
 
     def get_amount_contributed(self, obj):
@@ -152,3 +154,25 @@ class UserDashboardSerializer(Serializer):
         except Exception as e:
             pass
         return None
+    
+
+    def get_contribution(self, obj):
+        try:
+            user = self.context['user']
+            for contri in user.group.contributions.all():
+                if contri.status == ContributionStatus.ACTIVE:
+                    return ContributionSerializer(contri).data
+        except: pass
+
+    
+    def get_is_my_turn(self, obj):
+        try:
+            user = self.context['user']
+            for contri in user.group.contributions.all():
+                if (contri.status == ContributionStatus.ACTIVE) & contri.payout_to == user:
+                    return True
+        except: pass
+        return False
+
+
+        

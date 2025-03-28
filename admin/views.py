@@ -8,6 +8,8 @@ from users.models import User, NotificationType, Notification
 from contribution.models import Contribution, ContributionStatus, PayoutStatus, Group
 from core.permissions import IsAuthenticated, IsAdmin
 
+from services.notification_service import NotificationService
+
 
 
 class AdminLoginView(CreateAPIView):
@@ -93,7 +95,21 @@ class AddMemberToGroupView(CreateAPIView):
                     },
                 )
             group = Group.objects.get('group_id')
+            
+            if group.users.count() >= 12:
+                return Response(
+                    status=HTTP_400_BAD_REQUEST,
+                    data={
+                        'status_code': HTTP_400_BAD_REQUEST,
+                        'message': 'User addition to group failed',
+                        'data': 'Group already have up to 12 members'
+                    },
+                )
+            
             user.groups.add(kwargs.get('group_id')) # add user to group
+            print("here")
+            NotificationService.send_email(f'Group Notification', 'Hello {user.name},\n\n' \
+                'You have been added to a thrift contribution group.\nGroup name: ${group.name}\nYour turn: {user.group.position}', user.email)
 
             for contribution in group.contributions:
                 if contribution.postition == user.group.postition:
@@ -127,6 +143,10 @@ class DisburseFundView(CreateAPIView):
                 contribution.status = ContributionStatus.COMPLETED
                 contribution.payout_status = PayoutStatus.RECEIVED
                 contribution.save()
+
+                # send email notification
+                NotificationService.send_email(f'Payment Disbursement', 'Hello {{user.name}},\n\n' \
+                    'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', contribution.payout_to.email)
 
                 # create notification
                 Notification.objects.create(

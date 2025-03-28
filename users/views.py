@@ -4,7 +4,8 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FO
 from rest_framework.authtoken.models import Token
 
 from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer, ListUserSerializer, NotificationSerializer
-from .models import User, Notification
+from .models import User, Notification, NotificationType
+from services.notification_service import NotificationService
 from core.permissions import IsAuthenticated
 
 
@@ -17,6 +18,10 @@ class ListCreateAPIView(ListCreateAPIView):
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
+
+            # send email notification
+            NotificationService.send_email(f'Account Creation', 'Welcome {{user.name}},\n\nYou account has been successfully created for thrift contribution' ) #'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user.email)
+            
             return Response(
                 status=HTTP_201_CREATED,
                 data={

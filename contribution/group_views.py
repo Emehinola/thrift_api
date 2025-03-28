@@ -9,6 +9,8 @@ from .models import Group, UserGroup, Contribution, ContributionStatus
 from core.permissions import IsAdmin, IsAuthenticated
 from core.constants import MAX_GROUP_USERS
 from utils.date_utils import DateUtil
+from services.notification_service import NotificationService
+from users.models import Notification, NotificationType
 
 
 
@@ -147,8 +149,20 @@ class AddUserToGroupView(CreateAPIView):
     
     def post(self, request, *args, **kwargs):
         serializer = UserGroupSerializer(data=request.data)
+
         if serializer.is_valid():
+            group = serializer.validated_data.get('group')
             user_group = serializer.save()
+
+            if group.users.count() >= 12:
+                return Response(
+                    status=HTTP_400_BAD_REQUEST,
+                    data={
+                        'status_code': HTTP_400_BAD_REQUEST,
+                        'message': 'User addition to group failed',
+                        'data': 'Group already have up to 12 members'
+                    },
+                )
 
             # set rotation for users
             for contribution, user in zip(user_group.group.contributions.all(), user_group.group.users.all()):
@@ -157,8 +171,18 @@ class AddUserToGroupView(CreateAPIView):
 
                     if contribution.position != 1: # other contributions should be inactive
                         contribution.status = ContributionStatus.INACTIVE
-                        
+
                     contribution.save()
+
+            NotificationService.send_email(f'Group Notification', 'Hello {{user.name}},\n\n' \
+                'You have been added to a thrift contribution group.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user_group.user.email)
+            
+            Notification.objects.create(
+                    user=contribution.payout_to,
+                    notification_type=NotificationType.GROUP_INVITATION,
+                    message=f'You have been added to group {{group.name}}',
+                    amount=None
+                )
 
             return Response(
                 status=HTTP_201_CREATED,
