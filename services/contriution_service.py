@@ -59,7 +59,7 @@ f'You have been added to a thrift contribution group.\nGroup name: {group[0].nam
                     contribution_amount = amount,
                     description = f"This is group - {rand_int}"
                 )
-        
+        print("111")
         # create contributions
         for i in range(1, MAX_GROUP_USERS+1):
             start_date = DateUtil.get_date(i-1)[0]
@@ -68,11 +68,13 @@ f'You have been added to a thrift contribution group.\nGroup name: {group[0].nam
             Contribution.objects.get_or_create(
                     group=group, position=i, defaults={'payout_to': None, 'amount': group.contribution_amount, 'start_date': start_date, 'end_date': end_date}
             )
+        print("222")
 
         # set rotation for users
         for contribution, user in zip(group.contributions.all(), group.users.all()):
             contribution.payout_to = user.user
             contribution.save()
+        print("333")
         return group, group.users.count()
         
     @staticmethod
