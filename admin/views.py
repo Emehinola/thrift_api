@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework.authtoken.models import Token
@@ -7,8 +7,11 @@ from users.serializers import UserSerializer, LoginSerializer, RetrieveUserSeria
 from users.models import User, NotificationType, Notification
 from contribution.models import Contribution, ContributionStatus, PayoutStatus, Group
 from core.permissions import IsAuthenticated, IsAdmin
+from contribution.models import Contribution, ContributionPayment, PaymentStatus
 
 from services.notification_service import NotificationService
+
+import time
 
 
 
@@ -188,4 +191,39 @@ class DisburseFundView(CreateAPIView):
                     'message': 'Contribution not found',
                     'error': 'Contribution not found'
                 },
+            )
+        
+
+class SendReminderView(CreateAPIView):
+    permission_classes = (IsAuthenticated, IsAdmin)
+    
+    def post(self, request, *args, **kwargs):
+        id = kwargs.get('contribution_id')
+
+        if id is not None:
+            contribution = Contribution.objects.get(id=id)
+            paid_user_ids = [payment.user.id for payment in contribution.payments.all() if payment.status == PaymentStatus.PAID]
+
+            for user in contribution.group.users.all():
+                if user.id not in paid_user_ids:
+                    try:
+                        # send email notification
+                        NotificationService.send_email(f'Contribution Reminder!!!', 'Hello {request.user.name},\n\n' \
+                            f'You have been paid an amount of ₦{contribution.expected_amount}.\nGroup name: {contribution.group.name}\nYour turn: {contribution.payout_to.group.position}', contribution.payout_to.email)
+                    except:
+                        pass
+                time.sleep(3) # wait for 3 secs
+            return Response(
+                data={
+                    'message': 'Reminder sent',
+                    'data': None,
+                    'error': None
+                }, status=HTTP_200_OK
+            )
+        return Response(
+                data={
+                    'message': 'Reminder failed to send',
+                    'data': None,
+                    'error': 'Provide an id'
+                }, status=HTTP_400_BAD_REQUEST
             )
