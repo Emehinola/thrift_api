@@ -174,13 +174,13 @@ class AddUserToGroupView(CreateAPIView):
 
                     contribution.save()
 
-            NotificationService.send_email(f'Group Notification', 'Hello {{user.name}},\n\n' \
-                'You have been added to a thrift contribution group.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user_group.user.email)
+            NotificationService.send_email('Group Notification', f'Hello {user.name},\n\n' \
+                'You have been added to a thrift contribution group.\nGroup name: {group.name}\nYour turn: {user.group.position}', user_group.user.email)
             
             Notification.objects.create(
                     user=contribution.payout_to,
                     notification_type=NotificationType.GROUP_INVITATION,
-                    message=f'You have been added to group {{group.name}}',
+                    message=f"You have been added to group {group.name}",
                     amount=None
                 )
 

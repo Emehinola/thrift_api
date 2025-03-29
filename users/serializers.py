@@ -1,6 +1,6 @@
 from .models import User, Notification
 
-from rest_framework.serializers import Serializer, ModelSerializer, CharField
+from rest_framework.serializers import Serializer, ModelSerializer, CharField, FloatField
 
 class LoginSerializer(Serializer):
     email = CharField()
@@ -8,9 +8,10 @@ class LoginSerializer(Serializer):
 
 
 class UserSerializer(ModelSerializer):
+    contribution_amount = FloatField()
     class Meta:
         model = User
-        fields = ('email', 'name', 'phone', 'password')
+        fields = ('email', 'name', 'phone', 'password', 'contribution_amount')
 
     def create(self, validated_data):
         password = validated_data.get('password')

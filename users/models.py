@@ -30,8 +30,8 @@ class User(AbstractBaseUser):
 
     @property
     def group(self):
-        return self.groups.last()
-
+        from contribution.models import UserGroup
+        return UserGroup.objects.filter(user=self).last()
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

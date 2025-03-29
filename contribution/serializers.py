@@ -54,6 +54,7 @@ class AdminContributionSerializer(ModelSerializer):
 
 class SelfContributionSerializer(ModelSerializer):
     my_payment_status = SerializerMethodField()
+    payment_date = SerializerMethodField()
 
     class Meta:
         model = Contribution
@@ -67,6 +68,17 @@ class SelfContributionSerializer(ModelSerializer):
         except:
             pass
         return PaymentStatus.UPCOMING
+    
+    
+    def get_payment_date(self, obj):
+        try:
+            for payment in obj.payments.all():
+                if payment.user == self.context['user']:
+                    return payment.date_paid
+        except:
+            pass
+        return None
+
     
 
 class UserDashboardSerializer(Serializer):

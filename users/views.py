@@ -7,6 +7,7 @@ from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer
 from .models import User, Notification, NotificationType
 from services.notification_service import NotificationService
 from core.permissions import IsAuthenticated
+from services.contriution_service import ContributionService
 
 
 class ListCreateAPIView(ListCreateAPIView):
@@ -15,12 +16,18 @@ class ListCreateAPIView(ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
+        
         if serializer.is_valid():
+            amount = serializer.validated_data.get('contribution_amount')
+            del serializer.validated_data['contribution_amount']
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
 
+            # create group for user
+            ContributionService.add_member(user, amount)
+
             # send email notification
-            NotificationService.send_email(f'Account Creation', 'Welcome {{user.name}},\n\nYou account has been successfully created for thrift contribution' ) #'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user.email)
+            NotificationService.send_email('Account Creation', f'Welcome {user.name},\n\nYou account has been successfully created for thrift contribution', user.email ) #'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user.email)
             
             return Response(
                 status=HTTP_201_CREATED,
