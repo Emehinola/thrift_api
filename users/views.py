@@ -24,7 +24,8 @@ class ListCreateAPIView(ListCreateAPIView):
             token, created = Token.objects.get_or_create(user=user)
 
             # create group for user
-            ContributionService.add_member(user, amount)
+            if serializer.validated_data.get('contribution_amount') > 0:
+                ContributionService.add_member(user, amount)
             print("added")
 
             # send email notification
