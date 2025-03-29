@@ -5,11 +5,12 @@ from rest_framework.authtoken.models import Token
 
 from users.serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer
 from users.models import User, NotificationType, Notification
-from contribution.models import Contribution, ContributionStatus, PayoutStatus, Group
+from contribution.models import Contribution, ContributionStatus, PayoutStatus, Group, GroupStatus
 from core.permissions import IsAuthenticated, IsAdmin
 from contribution.models import Contribution, ContributionPayment, PaymentStatus
 
 from services.notification_service import NotificationService
+from .serializers import AdminDashboardSerializer
 
 import time
 
@@ -227,3 +228,30 @@ class SendReminderView(CreateAPIView):
                     'error': 'Provide an id'
                 }, status=HTTP_400_BAD_REQUEST
             )
+
+
+class AdminDashboardView(RetrieveAPIView):
+    serializer_class = AdminDashboardSerializer
+    permission_classes = (IsAuthenticated, IsAdmin)
+
+    def retrieve(self, request, *args, **kwargs):
+        current_members = User.objects.count()
+
+        data = {
+            'current_members': current_members,
+            'new_members': 3,
+            'current_groups': Group.objects.count(),
+            'active_groups': Group.objects.filter(status=GroupStatus.ACTIVE).count(),
+            'total_contribution': sum(payment.amount for payment in ContributionPayment.objects.all()),
+            'total_payouts': sum(contri.amount for contri in Contribution.objects.all() if contri.payout_status == PayoutStatus.RECEIVED),
+            'members_contributed': 10,
+            'members_contribution_pending': 30,
+        }
+        return Response(
+            data={
+                'message': 'Analytics data',
+                'data': data,
+                'status_code': HTTP_200_OK
+            },
+            status=HTTP_200_OK
+        )
