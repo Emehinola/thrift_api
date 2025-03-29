@@ -174,7 +174,7 @@ class AddUserToGroupView(CreateAPIView):
 
                     contribution.save()
 
-            NotificationService.send_email('Group Notification', f'Hello {user.name},\n\n' \
+            NotificationService.send_email('Group Notification', f'Hello {user_group.user.name},\n\n' \
                 'You have been added to a thrift contribution group.\nGroup name: {group.name}\nYour turn: {user.group.position}', user_group.user.email)
             
             Notification.objects.create(
