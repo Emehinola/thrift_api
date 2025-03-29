@@ -108,8 +108,11 @@ class AddMemberToGroupView(CreateAPIView):
             
             user.groups.add(kwargs.get('group_id')) # add user to group
             print("here")
-            NotificationService.send_email(f'Group Notification', 'Hello {user.name},\n\n' \
+            try:
+                NotificationService.send_email(f'Group Notification', 'Hello {user.name},\n\n' \
                 'You have been added to a thrift contribution group.\nGroup name: ${group.name}\nYour turn: {user.group.position}', user.email)
+            except:
+                pass
 
             for contribution in group.contributions:
                 if contribution.postition == user.group.postition:
@@ -144,9 +147,12 @@ class DisburseFundView(CreateAPIView):
                 contribution.payout_status = PayoutStatus.RECEIVED
                 contribution.save()
 
-                # send email notification
-                NotificationService.send_email(f'Payment Disbursement', 'Hello {{user.name}},\n\n' \
-                    'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', contribution.payout_to.email)
+                try:
+                    # send email notification
+                    NotificationService.send_email(f'Payment Disbursement', 'Hello {user.name},\n\n' \
+                    f'You have been paid an amount of ₦{contribution.expected_amount}.\nGroup name: {contribution.group.name}\nYour turn: {contribution.payout_to.group.position}', contribution.payout_to.email)
+                except:
+                    pass
 
                 # create notification
                 Notification.objects.create(
