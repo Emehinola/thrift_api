@@ -42,7 +42,7 @@ class FundContributionView(CreateAPIView):
                 request.user.wallet.save()
                 try:
                     # send email notification
-                    NotificationService.send_email(f'Wallet Funded!!!', f'Hello {request.user.name},\n\n' f'You have successfully funded your wallet\nAmount: ₦{serializer.validated_data.get('amount')}', request.user.email)
+                    NotificationService.send_email(f'Wallet Funded!!!', f'Hello {request.user.name},\n\n' f"You have successfully funded your wallet\nAmount: ₦{serializer.validated_data.get('amount')}", request.user.email)
                 except:
                     pass
             else:
