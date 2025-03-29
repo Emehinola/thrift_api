@@ -31,9 +31,12 @@ class ContributionService:
 
                     contribution.save()
         
-        NotificationService.send_email('Group Notification', f'Hello {user.name},\n\n' \
-f'You have been added to a thrift contribution group.\nGroup name: {group[0].name}\nYour turn: {user.group.position}', user_group.user.email)
-        print("email sent")
+        try:
+            NotificationService.send_email('Group Notification', f'Hello {user.name},\n\n' \
+                f'You have been added to a thrift contribution group.\nGroup name: {group[0].name}\nYour turn: {user.group.position}', user_group.user.email)
+            print("email sent")
+        except:
+            pass
         Notification.objects.create(
                     user=contribution.payout_to,
                     notification_type=NotificationType.GROUP_INVITATION,
