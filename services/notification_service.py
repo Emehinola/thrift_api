@@ -34,7 +34,7 @@ class NotificationService:
             print("Connected to server")
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.sendmail(EMAIL_SENDER, EMAIL_RECEIVER, msg.as_string())
-            server.quit()
+            # server.quit()
             print("✅ Email sent successfully!")
         except Exception as e:
             print(f"❌ Error: {e}")
