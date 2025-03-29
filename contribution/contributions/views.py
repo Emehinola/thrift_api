@@ -3,7 +3,8 @@ from rest_framework import response, status
 
 from ..serializers import AdminContributionSerializer, SelfContributionSerializer
 from ..models import Contribution, Group
-from core.permissions import IsStrictlyAuthenticated
+from core.permissions import IsStrictlyAuthenticated, IsAuthenticated
+from services.notification_service import NotificationService
 
 
 class ListContributionView(ListAPIView):
@@ -74,3 +75,26 @@ class RetrieveContributionForUserView(RetrieveAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+
+class GetReceiptView(RetrieveAPIView):
+    serializer_class = (IsStrictlyAuthenticated,)
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            contribution = Contribution.objects.get(id=kwargs.get('contribution_id'))
+            for payment in contribution.payments.all():
+                if payment.user == request.user:
+                    # send email notification
+                    NotificationService.send_email(f'Payment Receipt!!!', f'Hello {request.user.name},\n\n' \
+                        f'Kindly find attached below a copy of your payment receipt.\nAmount: ₦{contribution.amount}', request.user.email)
+        except:
+            pass
+
+        return response.Response(
+                data={
+                    'status_code': status.HTTP_200_OK,
+                    'message': 'Receipt sent to your email',
+                },
+                status=status.HTTP_200_OK
+            )
+
