@@ -37,7 +37,7 @@ f'You have been added to a thrift contribution group.\nGroup name: {group[0].nam
         Notification.objects.create(
                     user=contribution.payout_to,
                     notification_type=NotificationType.GROUP_INVITATION,
-                    message=f'You have been added to group {{group.name}}',
+                    message=f'You have been added to group {group.name}',
                     amount=None
                 )
         
