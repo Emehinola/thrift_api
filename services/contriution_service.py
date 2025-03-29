@@ -8,7 +8,6 @@ from .notification_service import NotificationService
 from users.models import User
 
 import random
-import string
 
 class ContributionService:
 
