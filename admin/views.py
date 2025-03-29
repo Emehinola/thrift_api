@@ -153,7 +153,7 @@ class DisburseFundView(CreateAPIView):
 
                 try:
                     # send email notification
-                    NotificationService.send_email(f'Payment Disbursement', 'Hello {user.name},\n\n' \
+                    NotificationService.send_email(f'Payment Disbursement', f'Hello {contribution.payout_to.name},\n\n' \
                     f'You have been paid an amount of ₦{contribution.expected_amount}.\nGroup name: {contribution.group.name}\nYour turn: {contribution.payout_to.group.position}', contribution.payout_to.email)
                 except:
                     pass
@@ -208,8 +208,8 @@ class SendReminderView(CreateAPIView):
                 if user.id not in paid_user_ids:
                     try:
                         # send email notification
-                        NotificationService.send_email(f'Contribution Reminder!!!', 'Hello {request.user.name},\n\n' \
-                            f'You have been paid an amount of ₦{contribution.expected_amount}.\nGroup name: {contribution.group.name}\nYour turn: {contribution.payout_to.group.position}', contribution.payout_to.email)
+                        NotificationService.send_email(f'Contribution Reminder!!!', f'Hello {request.user.name},\n\n' \
+                            f'Kindly be reminded that you have an outstanding contribution to make.\nAmount: ₦{contribution.amount}', user.email)
                     except:
                         pass
                 time.sleep(3) # wait for 3 secs
