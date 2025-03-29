@@ -1,6 +1,6 @@
 from .models import User, Notification
 
-from rest_framework.serializers import Serializer, ModelSerializer, CharField, FloatField
+from rest_framework.serializers import Serializer, ModelSerializer, CharField, FloatField, SerializerMethodField
 
 class LoginSerializer(Serializer):
     email = CharField()
@@ -26,10 +26,21 @@ class ListUserSerializer(ModelSerializer):
         model = User
         exclude = ('password', 'is_admin')
 
-class RetrieveUserSerializer(ModelSerializer):
+  
+
+class RetrieveUserSerializer(ModelSerializer):    
+    group = SerializerMethodField()
+
     class Meta:
         model = User
         exclude = ('password', 'is_admin')
+
+    def get_group(self, obj):
+        try:
+            return obj.group.group.id
+        except:
+            pass
+        return None
 
 class NotificationSerializer(ModelSerializer):
     class Meta:

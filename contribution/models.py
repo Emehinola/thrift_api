@@ -72,8 +72,8 @@ class Contribution(models.Model):
     position = models.IntegerField(default=1, validators=[MaxValueValidator(MAX_GROUP_USERS), MinValueValidator(1)])
     status = models.CharField(max_length=20, choices=ContributionStatus.choices, default=ContributionStatus.ACTIVE)
     payout_status = models.CharField(max_length=20, choices=PayoutStatus.choices, default=PayoutStatus.UPCOMING)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
 
     class Meta:
         db_table = 'contributions'
