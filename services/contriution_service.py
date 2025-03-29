@@ -34,12 +34,12 @@ class ContributionService:
         NotificationService.send_email('Group Notification', f'Hello {user.name},\n\n' \
 f'You have been added to a thrift contribution group.\nGroup name: {group[0].name}\nYour turn: {user.group.position}', user_group.user.email)
 
-        Notification.objects.create(
-                    user=contribution.payout_to,
-                    notification_type=NotificationType.GROUP_INVITATION,
-                    message=f'You have been added to group {group[0].name}',
-                    amount=None
-                )
+        # Notification.objects.create(
+        #             user=contribution.payout_to,
+        #             notification_type=NotificationType.GROUP_INVITATION,
+        #             message=f'You have been added to group {group[0].name}',
+        #             amount=None
+        #         )
         
     @staticmethod
     def _create_group(amount):
