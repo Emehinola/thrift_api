@@ -171,10 +171,12 @@ class UserDashboardSerializer(Serializer):
     def get_contribution(self, obj):
         try:
             user = self.context['user']
-            for contri in user.group.contributions.all():
+            for contri in user.group.group.contributions.all():
                 if contri.status == ContributionStatus.ACTIVE:
                     return ContributionSerializer(contri).data
-        except: pass
+        except: 
+
+            pass
 
     
     def get_is_my_turn(self, obj):
