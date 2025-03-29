@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, IntegerField, SerializerMethodField, CharField, Serializer
+from rest_framework.serializers import ModelSerializer, IntegerField, SerializerMethodField, CharField, Serializer, FloatField
 from .models import Group, UserGroup, Contribution, PaymentStatus, ContributionStatus, ContributionPayment, PayoutStatus
 
 class GroupSerializer(ModelSerializer):
@@ -189,4 +189,4 @@ class UserDashboardSerializer(Serializer):
         return False
 
 
-        
+    

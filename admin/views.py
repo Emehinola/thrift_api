@@ -10,7 +10,7 @@ from core.permissions import IsAuthenticated, IsAdmin
 from contribution.models import Contribution, ContributionPayment, PaymentStatus
 
 from services.notification_service import NotificationService
-from .serializers import AdminDashboardSerializer
+from .serializers import AdminDashboardSerializer, PayoutScheduleSerializer
 
 import time
 
@@ -248,6 +248,31 @@ class AdminDashboardView(RetrieveAPIView):
             'members_contribution_pending': 30,
         }
         return Response(
+            data={
+                'message': 'Analytics data',
+                'data': data,
+                'status_code': HTTP_200_OK
+            },
+            status=HTTP_200_OK
+        )
+    
+
+class PayoutScheduleView(RetrieveAPIView):
+    serializer_class = PayoutScheduleSerializer
+    permission_classes = (IsAuthenticated, IsAdmin)
+
+    def retrieve(self, request, *args, **kwargs):
+          data = None
+          group = Group.objects.get(id=kwargs.get('group_id'))
+
+          for contri in group.contributions.all():
+              if (contri.status == ContributionStatus.ACTIVE) & (contri.payout_to is not None):
+                  data = {
+                        'next_recipient': contri.payout_to.name,
+                        'amount': contri.expected_amount,
+                        'date': contri.end_date
+                  }
+          return Response(
             data={
                 'message': 'Analytics data',
                 'data': data,

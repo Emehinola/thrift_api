@@ -4,11 +4,6 @@ from rest_framework.serializers import Serializer, IntegerField, BooleanField, F
 class DisburseFundSerializer(Serializer):
     contribution_id = IntegerField()
 
-class PayoutScheduleSerializer(Serializer):
-    next_recipient = CharField()
-    amount = FloatField()
-    date = CharField()
-
 
 class AdminDashboardSerializer(Serializer):
     current_members = IntegerField()
@@ -19,3 +14,9 @@ class AdminDashboardSerializer(Serializer):
     total_payouts = FloatField()
     members_contributed = IntegerField()
     members_contribution_pending = IntegerField()
+
+
+class PayoutScheduleSerializer(Serializer):
+    next_recipient = CharField()
+    amount = FloatField()
+    date = CharField()
