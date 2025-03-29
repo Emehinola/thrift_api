@@ -49,6 +49,7 @@ f'You have been added to a thrift contribution group.\nGroup name: {group[0].nam
             if g.users.count() < 12:
                 group = g
                 break
+        print(group)
          
         if group == None:
             rand_int = random.Random(100,999)
