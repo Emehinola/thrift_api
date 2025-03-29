@@ -25,9 +25,10 @@ class ListCreateAPIView(ListCreateAPIView):
 
             # create group for user
             ContributionService.add_member(user, amount)
+            print("added")
 
             # send email notification
-            NotificationService.send_email('Account Creation', f'Welcome {user.name},\n\nYou account has been successfully created for thrift contribution', user.email ) #'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user.email)
+            # NotificationService.send_email('Account Creation', f'Welcome {user.name},\n\nYou account has been successfully created for thrift contribution', user.email ) #'You have been paid an amount of ₦{{contribution.expected_amount}}.\nGroup name: {{group.name}}\nYour turn: {{user.group.position}}', user.email)
             
             return Response(
                 status=HTTP_201_CREATED,
