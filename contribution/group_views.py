@@ -174,15 +174,18 @@ class AddUserToGroupView(CreateAPIView):
 
                     contribution.save()
 
-            NotificationService.send_email('Group Notification', f'Hello {user_group.user.name},\n\n' \
-                'You have been added to a thrift contribution group.\nGroup name: {group.name}\nYour turn: {user.group.position}', user_group.user.email)
+            try:
+                NotificationService.send_email('Group Notification', f'Hello {user_group.user.name},\n\n' \
+                    'You have been added to a thrift contribution group.\nGroup name: {group.name}\nYour turn: {user.group.position}', user_group.user.email)
+            except:
+                pass
             
-            Notification.objects.create(
-                    user=contribution.payout_to,
-                    notification_type=NotificationType.GROUP_INVITATION,
-                    message=f"You have been added to group {group.name}",
-                    amount=None
-                )
+            # Notification.objects.create(
+            #         user=contribution.payout_to,
+            #         notification_type=NotificationType.GROUP_INVITATION,
+            #         message=f"You have been added to group {group.name}",
+            #         amount=None
+            #     )
 
             return Response(
                 status=HTTP_201_CREATED,

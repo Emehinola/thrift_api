@@ -109,14 +109,15 @@ class AddMemberToGroupView(CreateAPIView):
             user.groups.add(kwargs.get('group_id')) # add user to group
             print("here")
             try:
-                NotificationService.send_email(f'Group Notification', 'Hello {user.name},\n\n' \
-                'You have been added to a thrift contribution group.\nGroup name: ${group.name}\nYour turn: {user.group.position}', user.email)
+                NotificationService.send_email(f'Group Notification', f'Hello {user.name},\n\n' \
+                    'You have been added to a thrift contribution group.\nGroup name: {group.name}\nYour turn: {user.group.position}', user.email)
             except:
                 pass
 
             for contribution in group.contributions:
                 if contribution.postition == user.group.postition:
                     contribution.set_payout_to(user) # set user rotation
+            print("here")
 
             return Response(
                 status=HTTP_200_OK,
