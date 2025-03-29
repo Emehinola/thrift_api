@@ -33,8 +33,10 @@ class NotificationService:
             server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
             print("Connected to server")
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            print("after login")
             server.sendmail(EMAIL_SENDER, EMAIL_RECEIVER, msg.as_string())
-            # server.quit()
+            print("after send")
+            server.quit()
             print("✅ Email sent successfully!")
         except Exception as e:
             print(f"❌ Error: {e}")
