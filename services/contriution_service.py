@@ -52,12 +52,12 @@ f'You have been added to a thrift contribution group.\nGroup name: {group[0].nam
                 break
          
         if group == None:
-            random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
+            rand_int = random.Random(100,999)
             group = Group.objects.create(
                     created_by = ContributionService._get_admin(),
-                    name = f"Group {random_string}",
+                    name = f"Group {rand_int}",
                     contribution_amount = amount,
-                    description = f"This is group - {random_string}"
+                    description = f"This is group - {rand_int}"
                 )
         
         # create contributions
