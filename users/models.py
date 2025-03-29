@@ -43,3 +43,11 @@ class Notification(models.Model):
 
     class Meta:
         db_table = 'notifications'
+
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
+    amount = models.FloatField(default=0)
+
+    class Meta:
+        db_table = 'wallets'

@@ -1,5 +1,8 @@
 from rest_framework.serializers import ModelSerializer, IntegerField, SerializerMethodField, CharField, Serializer, FloatField
 from .models import Group, UserGroup, Contribution, PaymentStatus, ContributionStatus, ContributionPayment, PayoutStatus
+from users.serializers import WalletSerializer
+from users.models import Wallet
+
 
 class GroupSerializer(ModelSerializer):
     class Meta:
@@ -91,6 +94,7 @@ class UserDashboardSerializer(Serializer):
     my_rotation = SerializerMethodField()
     contribution = SerializerMethodField()
     is_my_turn = SerializerMethodField()
+    wallet = SerializerMethodField()
 
 
     def get_amount_contributed(self, obj):
@@ -187,6 +191,15 @@ class UserDashboardSerializer(Serializer):
                     return True
         except: pass
         return False
+    
+    def get_wallet(self, obj):
+        try:
+            wallet, created = Wallet.objects.get_or_create(user=self.context['user'])
+            return WalletSerializer(wallet).data
+        except Exception as e:
+            print(e)
+            pass
+        return None
 
 
     

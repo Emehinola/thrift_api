@@ -1,4 +1,4 @@
-from .models import User, Notification
+from .models import User, Notification, Wallet
 
 from rest_framework.serializers import Serializer, ModelSerializer, CharField, FloatField, SerializerMethodField
 
@@ -45,4 +45,10 @@ class RetrieveUserSerializer(ModelSerializer):
 class NotificationSerializer(ModelSerializer):
     class Meta:
         model = Notification
+        fields = '__all__'
+
+
+class WalletSerializer(ModelSerializer):
+    class Meta:
+        model = Wallet
         fields = '__all__'

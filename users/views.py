@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework.authtoken.models import Token
 
-from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer, ListUserSerializer, NotificationSerializer
+from .serializers import UserSerializer, LoginSerializer, RetrieveUserSerializer, ListUserSerializer, NotificationSerializer, WalletSerializer
 from .models import User, Notification, NotificationType
 from services.notification_service import NotificationService
 from core.permissions import IsAuthenticated
